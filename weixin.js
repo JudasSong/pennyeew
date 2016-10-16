@@ -22,35 +22,33 @@ exports.reply = function*(next) {
             this.body = '看到你扫二维码了';
         } else if (message.Event === 'VIEW') {
             this.body = '您点击了菜单中的链接：' + message.EventKey;
-        } else if (message.MsgType === 'text') {
-            var content = message.Content;
-            var reply = '额，你说的 ' + message.content + ' 太复杂了'；
+        }
+    } else if (message.MsgType === 'text') {
+        var content = message.Content;
+        var reply = '额，你说的 ' + message.Content + ' 太复杂了';
 
-            if (content === '1') {
-                reply = '第一种方法看书';
-            } else if (content === '1') {
-                reply = '第二种方法喝茶';
-            } else if (content === '3') {
-                reply = '第二种方法晒太阳';
-            } else if (content === '4') {
-                reply = [{
-                    title: '生活多喜乐',
-                    description: '花鸟鱼虫，山河树木',
-                    picUrl: 'http://oiler.manami.com.cn/img/1.jpg',
-                    url: 'http://oiler.manami.com.cn/'
-                }, {
-                    title: '技术生活',
-                    description: 'IT改变什么',
-                    picUrl: 'http://oiler.manami.com.cn/img/2.jpg',
-                    url: 'http://manami.com.cn/'
-                }];
-            }
-
-            this.body = reply;
-        } else {
-
+        if (content === '1') {
+            reply = '第一种方法看书';
+        } else if (content === '2') {
+            reply = '第二种方法喝茶';
+        } else if (content === '3') {
+            reply = '第二种方法晒太阳';
+        } else if (content === '4') {
+            reply = [{
+                title: '生活多喜乐',
+                description: '花鸟鱼虫，山河树木',
+                picUrl: 'http://oiler.manami.com.cn/img/1.jpg',
+                url: 'http://oiler.manami.com.cn/'
+            }, {
+                title: '技术生活',
+                description: 'IT改变什么',
+                picUrl: 'http://oiler.manami.com.cn/img/2.jpg',
+                url: 'http://manami.com.cn/'
+            }];
         }
 
-        yield next;
+        this.body = reply;
     }
+
+    yield next;
 }

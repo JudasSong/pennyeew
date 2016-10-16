@@ -53,11 +53,11 @@ function formatMessage(result) {
 
 exports.formatMessage = formatMessage;
 
-exports.tpl = function() {
+exports.tpl = function(content, message) {
     var info = {};
     var type = 'text';
     var fromUserName = message.FormUserName;
-    var toUserName = messageToUserName;
+    var toUserName = message.ToUserName;
 
     if (Array.isArray(content)) {
         type = 'news'

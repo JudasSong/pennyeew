@@ -7,10 +7,10 @@ var Wechat = require('./wechat');
 var util = require('./util');
 
 //检查微信签名认证中间件 
-module.exports = function(opts) {
-    // var wechat = new Wechat(opts);
+module.exports = function(opts, handler) {
+    var wechat = new Wechat(opts);
 
-    return function*(req, res, next) {
+    return function*(next) {
         // console.log(this.method);
         var that = this;
 
@@ -20,7 +20,7 @@ module.exports = function(opts) {
         var nonce = this.query.nonce;
         var echostr = this.query.echostr;
 
-        // 参数             描述
+        // 参数         描述
         // signature    微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。
         // timestamp    时间戳
         // nonce        随机数
@@ -51,12 +51,12 @@ module.exports = function(opts) {
 
             var content = yield util.parseXMLAsync(data);
             var message = util.formatMessage(content.xml);
-            console.log(data.toString());
-            console.log(message);
+            // console.log(data.toString());
+            // console.log(message);
 
-            this.weixin=message;
+            this.weixin = message;
 
-            yield handler.call(this,next);
+            handler.call(this, next);
 
             wechat.reply.call(this);
         }
