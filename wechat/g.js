@@ -1,17 +1,16 @@
 'use strict'
 
-// var utils = {};
 var sha1 = require('sha1');
 var getRawBody = require('raw-body');
 var Wechat = require('./wechat');
 var util = require('./util');
 
 //检查微信签名认证中间件 
-module.exports = function(opts, handler) {
+module.exports = function (opts, handler) {
     var wechat = new Wechat(opts);
 
-    return function*(next) {
-        // console.log(this.method);
+    return function *(next) {
+        // console.log(this);
         var that = this;
 
         var token = opts.token;
@@ -33,7 +32,7 @@ module.exports = function(opts, handler) {
         // 如果匹配,返回echoster , 不匹配则返回error
         if (this.method == 'GET') {
             if (sha === signature) {
-                this.body = echostr;
+                this.body = echostr + '';
             } else {
                 this.body = 'error';
             }
@@ -51,50 +50,25 @@ module.exports = function(opts, handler) {
 
             var content = yield util.parseXMLAsync(data);
             var message = util.formatMessage(content.xml);
-            // console.log(data.toString());
-            // console.log(message);
-
+            //console.log("反推："+JSON.stringify(message));
             this.weixin = message;
 
-            handler.call(this, next);
+            //if (message.MsgType === 'event') {
+            //    if (message.Event === 'subscribe') {
+            //        var now = new Date().getTime();
+            //
+            //        that.status = 200;
+            //        that.type = 'application/xml';
+            //        that.body = "<xml><ToUserName><![CDATA[" + message.FromUserName + "]]></ToUserName><FromUserName><![CDATA[" + message.ToUserName + "]]></FromUserName><CreateTime>" + now + "</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[哪嗒]]></Content></xml>";
+            //
+            //        console.log(that);
+            //        return;
+            //    }
+            //}
 
-            wechat.reply.call(this);
+
+            yield handler.call(this, next);  //回复给微信的内容  next空对象
+            wechat.reply.call(this);  //处理调用wechat.js里的wechat.reply方法
         }
     }
 };
-
-
-//检查微信签名认证中间件  
-// utils.sign = function(config) {
-//     return function*(req, res, next) {
-//         config = config || {};
-//         console.log(req);
-//         return false;
-//         var q = req.query;
-
-//         console.log(JSON.stringify(q));
-//         var token = config.token;
-//         var signature = q.signature; //微信加密签名  
-//         var nonce = q.nonce; //随机数  
-//         var timestamp = q.timestamp; //时间戳  
-//         var echostr = q.echostr; //随机字符串  
-
-//         var str = [token, timestamp, nonce].sort().join('');
-//         var sha = sha1(str);
-
-//         if (req.method == 'GET') {
-//             if (sha == signature) {
-//                 res.send(echostr + '')
-//             } else {
-//                 res.send('err');
-//             }
-//         } else if (req.method == 'POST') {
-//             if (sha != signature) {
-//                 return;
-//             }
-//             next();
-//         }
-//     }
-// };
-
-// module.exports = utils.sign;

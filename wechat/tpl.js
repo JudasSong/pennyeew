@@ -4,24 +4,24 @@ var ejs = require('ejs');
 var heredoc = require('heredoc');
 
 var tpl = heredoc(function() {/*
-	<xml> 
+	<xml>
         <ToUserName><![CDATA[<%= toUserName %>]]></ToUserName>
         <FromUserName><![CDATA[<%= fromUserName %>]]></FromUserName>
-        <CreateTime><%= createTime %></CreateTime>        
+        <CreateTime><%= createTime %></CreateTime>
         <MsgType><![CDATA[<%= msgType %>]]></MsgType>
         <% if (msgType==='text') { %>
-        	<Content><![CDATA[Hi,my name is hello!]]></Content>
+        	<Content><![CDATA[<%= content %>]]></Content>
         <% } else if (msgType==='image') { %>
         	<Image>
-        		<MediaId><![CDATA[<%= content.media_id %>]]></MediaId>
+        		<MediaId><![CDATA[<%= content.mediaId %>]]></MediaId>
         	</Image>
         <% } else if (msgType==='voice') { %>
-        	<Image>
-        		<MsgType><![CDATA[<%= content.media_id %>]]></MsgType>
-        	</Image>
+        	<Voice>
+        		<MsgType><![CDATA[<%= content.mediaId %>]]></MsgType>
+        	</Voice>
         <% } else if (msgType==='video') { %>
         	<Video>
-            	<MediaId><![CDATA[<%= content.media_id %>]]></MediaId>
+            	<MediaId><![CDATA[<%= content.mediaId %>]]></MediaId>
             	<Title><![CDTA[<%= content.title %>]]></Title>
             	<Description><![CDTA[<%= content.description %>]]></Description>
         	</Video>
@@ -38,12 +38,12 @@ var tpl = heredoc(function() {/*
 		    <Articles>
 		    <%  content.forEach(function(item) { %>
 		        <item>
-		            <Title><![CDATA[<%= item.title %>]]></Title> 
+		            <Title><![CDATA[<%= item.title %>]]></Title>
 		            <Description><![CDATA[<%= item.description %>]]></Description>
-		            <PicUrl><![CDATA[<%= item.picur %>]]></PicUrl>
+		            <PicUrl><![CDATA[<%= item.picUrl %>]]></PicUrl>
 		            <Url><![CDATA[<%= item.url %>]]></Url>
 		        </item>
-		        <% }) %>
+		    <% }) %>
 		    </Articles>
 		<% } %>
     </xml>
@@ -51,6 +51,6 @@ var tpl = heredoc(function() {/*
 
 var compiled=ejs.compile(tpl);
 
-exports=module.exports={
+module.exports={
 	compiled:compiled
 }

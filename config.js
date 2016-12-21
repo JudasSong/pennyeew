@@ -8,7 +8,7 @@ var config = {
     wechat: {
         "appID": 'wxa584c706e210b4b9',
         "appSecret": 'a10dbc78ec075df6d2c2250f786d6d4b',
-        "token": '0987654321scj',
+        "token": 'pennyohknogorccscj',
         // "prefix": "https://api.weixin.qq.com/cgi-bin/",
         // "mpPrefix": "https://mp.weixin.qq.com/cgi-bin/",
         "getAccessToken": function() {
