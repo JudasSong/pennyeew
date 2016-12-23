@@ -51,7 +51,9 @@ exports.reply = function *(next) {
                 "picUrl": 'http://oiler.manami.com.cn/img/2.jpg',
                 "url": 'http://www.manami.com.cn'
             }];
-        } else if (content === '5') {
+
+            //console.log();
+        } else if (content === '5') { //5、6、7无接口权限--临时素材
             var data = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg');
 
             reply = {
@@ -61,7 +63,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '6') {
-            var data = yield wechatApi.uploadMaterial('video', __dirname + '/2.jpg');
+            var data = yield wechatApi.uploadMaterial('video', __dirname + '/yangxue.mp4');
 
             reply = {
                 "type": 'video',
@@ -78,9 +80,34 @@ exports.reply = function *(next) {
                 "type": 'music',
                 "title": "回复一个音乐，听音乐",
                 "description": "来放松一下，呵呵！",
-                "MusicUrl": 'url------  ',
+                "MusicUrl": '一段线上音乐地址url------  ',
                 //"HQMusicUrl":'',
                 "ThumbMediaId": data.media_id
+            }
+
+            console.log(reply);
+        } else if (content === '8') { //
+            var data = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg', {type: 'image'});
+
+            reply = {
+                "type": 'image',
+                "mediaId": data.media_id
+            }
+
+            console.log(reply);
+        } else if (content === '9') { //
+            var data = yield wechatApi.uploadMaterial('video', __dirname + '/yangxue.mp4', {
+                type: 'video',
+                description: '{"title":"Really a nice place","introduction":"I have a dream"}'
+            });
+
+            console.log("永久素材的视频：" + data + "\n");
+
+            reply = {
+                "type": 'video',
+                "title": "回复一个MP4视频",
+                "description": "这里只是一个小饰品，哈哈！",
+                "mediaId": data.media_id
             }
 
             console.log(reply);
