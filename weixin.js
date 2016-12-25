@@ -111,6 +111,73 @@ exports.reply = function *(next) {
             }
 
             console.log(reply);
+        } else if (content === '10') { //
+            var picData = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg', {});
+
+            var media = {
+                "articles": [{
+                    "title": "tututtu1",
+                    "thumb_media_id": picData.mediaId,
+                    "author": "Scott",
+                    "digest": "没有摘要",
+                    "show_cover_pic": 1,
+                    "content": "没有内容",
+                    "content_source_url": "https://github.com"
+                }, {
+                    "title": "tututtu2",
+                    "thumb_media_id": picData.mediaId,
+                    "author": "Scott",
+                    "digest": "没有摘要",
+                    "show_cover_pic": 1,
+                    "content": "没有内容",
+                    "content_source_url": "https://github.com"
+                }]
+            };
+
+            data = yield wechatApi.uploadMaterial('news', media, {});
+            data = yield wechatApi.fetchMaterial(data.media_id, 'news', {});
+
+            console.log("：" + data + "\n");
+
+            var items = data.news_item;
+            var news = [];
+
+            items.forEach(function (item) {
+                news.push({
+                    "title": item.title,
+                    "description": item.digest,
+                    "picUrl": picData.url,
+                    "url": item.url
+                })
+            });
+
+            reply = news;
+            console.log(reply);
+        } else if (content === '11') { //
+            var counts = yield wechatApi.countMaterial();
+
+            console.log(JSON.stringify(counts));
+            var results = yield [
+                wechatApi.batchMaterial({
+                    type: 'image',
+                    "offset": 0,
+                    "count": 10
+                }), wechatApi.batchMaterial({
+                    type: 'video',
+                    "offset": 0,
+                    "count": 10
+                }), wechatApi.batchMaterial({
+                    type: 'voice',
+                    "offset": 0,
+                    "count": 10
+                }), wechatApi.batchMaterial({
+                    type: 'news',
+                    "offset": 0,
+                    "count": 10
+                })];
+
+            console.log(results);
+            reply = '11';
         }
 
         this.body = reply;

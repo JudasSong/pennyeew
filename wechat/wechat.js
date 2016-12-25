@@ -21,6 +21,16 @@ var api = {
         update: prefix + 'material/update_news?',
         count: prefix + 'material/get_materialcount?',
         batch: prefix + 'material/batchget_material?'
+    },
+    group: {
+        create: prefix + 'tags/create?',
+        delete: prefix + 'tags/delete?',
+        fetch: prefix + 'tags/get?',   //获取
+        check: prefix + 'tags/getidlist?',  //接口不明确  tags/getidlist?  /user/tag/get?
+        update: prefix + 'tags/update?',
+        move: prefix + 'tags/members/getblacklist?',
+        batchupdate: prefix + 'tags/members/batchtagging?',
+        del: prefix + 'tags/members/batchuntagging?'
     }
 }
 
@@ -116,8 +126,8 @@ Wechat.prototype.uploadMaterial = function (type, material, permanent) {
 
                 console.log("-----url：" + url + "\n");
 
-                //return;
-                request({"method": "POST", "url": url, "formData": form, "json": true}).then(function (response) {
+                //return;{"method": "POST", "url": url, "formData": form, "json": true}
+                request(options).then(function (response) {
                         var _data = response[1];
 
                         //console.log(response);
@@ -147,14 +157,44 @@ Wechat.prototype.fetchMaterial = function (mediaId, type, permanent) {
         that
             .fetchAccessToken()
             .then(function (data) {
-                var url = fetchUrl + 'access_token=' + data.access_token + '&media_id=' + mediaId;
+                var url = fetchUrl + 'access_token=' + data.access_token;
+                var options = {
+                    "method": "POST",
+                    "url": url,
+                    "json": true
+                };
+                var form = {};
 
-                if (!permanent && type === 'video') {
-                    url = url.replace('https://', 'http://');
+                if (permanent) {
+                    form.media_id = mediaId;
+                    form.access_token = data.access_token;
+
+                    options.body = form;
+                } else {
+                    if (type === 'video') {
+                        url = url.replace("https://", "http://")
+                    }
+                    url += '&media_id=' + mediaId;
                 }
 
-                console.log("-----url：" + url + "\n");
-                resolve(url);
+                if (type === 'news' || type === 'video') {
+                    request(options).then(function (response) {
+                            var _data = response[1];
+
+                            if (_data) {
+                                resolve(_data);
+                            } else {
+                                throw new Error('fetch material fails');
+                            }
+                        })
+                        .catch(function (err) {
+                            reject(err);
+                        })
+                } else {
+                    resolve(url);
+                }
+
+
             })
     });
 }
@@ -172,16 +212,19 @@ Wechat.prototype.deleteMaterial = function (mediaId) {
                 var url = api.permanent.del + 'access_token=' + data.access_token + '&media_id=' + mediaId;
 
                 request({"method": "POST", "url": url, "body": form, "json": true}).then(function (response) {
-                    var _data = response[1];
+                        var _data = response[1];
 
-                    //console.log(response);
-                    //return;
-                    if (_data) {
-                        resolve(_data);
-                    } else {
-                        throw new Error('Delete material fails');
-                    }
-                })
+                        //console.log(response);
+                        //return;
+                        if (_data) {
+                            resolve(_data);
+                        } else {
+                            throw new Error('Delete material fails');
+                        }
+                    })
+                    .catch(function (err) {
+                        reject(err);
+                    })
             })
     });
 }
@@ -210,6 +253,8 @@ Wechat.prototype.updateMaterial = function (mediaId, news) {
                     } else {
                         throw new Error('update material fails');
                     }
+                }).catch(function (err) {
+                    reject(err);
                 })
             })
     });
@@ -234,6 +279,8 @@ Wechat.prototype.countMaterial = function () {
                     } else {
                         throw new Error('count material fails');
                     }
+                }).catch(function (err) {
+                    reject(err);
                 })
             })
     });
@@ -245,8 +292,6 @@ Wechat.prototype.batchMaterial = function (options) {
     options.type = options.type || 'image';
     options.offset = options.offset || 0;
     options.count = options.count || 1;
-    options.type = options.type || 'image';
-    options.type = options.type || 'image';
 
     return new Promise(function (resolve, reject) {
         that
@@ -263,6 +308,173 @@ Wechat.prototype.batchMaterial = function (options) {
                         resolve(_data);
                     } else {
                         throw new Error('batch material fails');
+                    }
+                }).catch(function (err) {
+                    reject(err);
+                })
+            })
+    });
+}
+
+
+/* 用户标签管理 */
+/*创建标签*/
+Wechat.prototype.createGroup = function (name) {
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        that
+            .fetchAccessToken()
+            .then(function (data) {
+                var url = api.group.create + 'access_token=' + data.access_token;
+                var form = {
+                    "tag": {
+                        "name": name//标签名
+                    }
+                }
+
+                request({"method": "POST", "url": url, "body": form, "json": true}).then(function (response) {
+                    var _data = response[1];
+
+                    //console.log(response);
+                    //return;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('create group fails');
+                    }
+                }).catch(function (err) {
+                    reject(err);
+                })
+            })
+    });
+}
+
+/*获取标签*/
+Wechat.prototype.fetchGroup = function () {
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        that
+            .fetchAccessToken()
+            .then(function (data) {
+                var url = api.group.fetch + 'access_token=' + data.access_token;
+
+                //此处get请求
+                request({"url": url, "json": true}).then(function (response) {
+                    var _data = response[1];
+
+                    //console.log(response);
+                    //return;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('fetch group fails');
+                    }
+                }).catch(function (err) {
+                    reject(err);
+                })
+            })
+    });
+}
+
+/* 查询用户所在分组 接口不明确 */
+Wechat.prototype.checkGroup = function (openid) {
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        that
+            .fetchAccessToken()
+            .then(function (data) {
+                var url = api.group.check + 'access_token=' + data.access_token;
+                var form = {
+                 "openid": openid
+                 }
+
+                /*var form = {
+                    "tagid": tagid,
+                    "next_openid": openid//第一个拉取的OPENID，不填默认从头开始拉取
+                }*/
+
+                request({"method": "POST", "url": url, "body": form, "json": true}).then(function (response) {
+                    var _data = response[1];
+
+                    //console.log(response);
+                    //return;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('check group fails');
+                    }
+                }).catch(function (err) {
+                    reject(err);
+                })
+            })
+    });
+}
+
+Wechat.prototype.updateGroup = function (id, name) {
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        that
+            .fetchAccessToken()
+            .then(function (data) {
+                var url = api.group.update + 'access_token=' + data.access_token;
+                var form = {
+                    "tag": {
+                        "id": id,  //分组id(标签id)
+                        "name": name
+                    }
+                }
+
+                request({"method": "POST", "url": url, "body": form, "json": true}).then(function (response) {
+                    var _data = response[1];
+
+                    //console.log(response);
+                    //return;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('update group fails');
+                    }
+                }).catch(function (err) {
+                    reject(err);
+                })
+            })
+    });
+}
+
+//批量移动分组和单个移动分组合并到一个方法，根据openid判断数组
+Wechat.prototype.moveGroup = function (openIds, to) {
+    var that = this;
+
+    return new Promise(function (resolve, reject) {
+        that
+            .fetchAccessToken()
+            .then(function (data) {
+                var url;
+                var form = {
+                    "tagid": to
+                }
+
+                if (_.isArray(openIds)) {
+                    url = api.group.batchupdate + 'access_token=' + data.access_token;
+                    form.openid_list = openIds;
+                } else {
+                    url = api.group.move + 'access_token=' + data.access_token;
+                    form.openid = openIds;
+                }
+
+                request({"method": "POST", "url": url, "body": form, "json": true}).then(function (response) {
+                    var _data = response[1];
+
+                    //console.log(response);
+                    //return;
+                    if (_data) {
+                        resolve(_data);
+                    } else {
+                        throw new Error('Move material fails');
                     }
                 })
             })
