@@ -3,7 +3,16 @@
 var path = require('path');
 var config = require('./config');
 var Wechat = require('./wechat/wechat');
+var menu = require('./menu');
 var wechatApi = new Wechat(config.wechat);
+
+wechatApi.deleteMenu()
+    .then(function () {
+        return wechatApi.createMenu(menu)
+    })
+    .then(function (msg) {
+        console.log(msg);
+    })
 
 exports.reply = function *(next) {
     var message = this.weixin;
@@ -183,9 +192,9 @@ exports.reply = function *(next) {
             //console.log("新分组 family");
             //console.log(group);
             //
-            //var groups = yield wechatApi.fetchGroups();
-            //console.log("加了 新分组 分组列表");
-            //console.log(groups);
+            var groups = yield wechatApi.fetchGroups();
+            console.log("加了 新分组 分组列表");
+            console.log(groups);
             //
             //var checkGroup = yield wechatApi.checkGroup(message.FromUserName);
             //console.log("查看自己的分组");
@@ -199,13 +208,13 @@ exports.reply = function *(next) {
             //console.log("移动后的分组列表");
             //console.log(moveGroupEnd);
 
-            var batchMoveGroup = yield wechatApi.moveGroup([message.FromUserName], 101);
-            console.log("批量移动到 101");
-            console.log(batchMoveGroup);
-
-            var batchMoveGroupEnd = yield wechatApi.fetchGroups();
-            console.log("批量移动后 分组列表");
-            console.log(batchMoveGroupEnd);
+            //var batchMoveGroup = yield wechatApi.moveGroup([message.FromUserName], 101);
+            //console.log("批量移动到 101");
+            //console.log(batchMoveGroup);
+            //
+            //var batchMoveGroupEnd = yield wechatApi.fetchGroups();
+            //console.log("批量移动后 分组列表");
+            //console.log(batchMoveGroupEnd);
 
             //var updateGroup = yield wechatApi.updateGroup(100,'wechat100');
             //console.log("100 wechat改名wechat100");
@@ -245,12 +254,31 @@ exports.reply = function *(next) {
             reply = userList.total;
         } else if (content === '15') {
             var mpnews = {
-                media_id: "Vt_UZuYPXrTK4KP5niW_nNFEzLVMO0DyP1UnL2x9kj4"
-            }
-            var msgData = yield wechatApi.sendByGroup('mpnews', mpnews, 101);
+                media_id: "Vt_UZuYPXrTK4KP5niW_nCkGtvLqfyTzkjTeN67e_P8"
+            };
+            var text = {
+                "content": "Hello Wechat"
+            };
+            var msgData = yield wechatApi.sendByGroup('text', text, 0);  //'mpnews', mpnews, 0
             console.log(msgData);
 
             reply = "Yeah!";
+        } else if (content === '16') {
+            //var mpnews = {
+            //    media_id: "Vt_UZuYPXrTK4KP5niW_nCkGtvLqfyTzkjTeN67e_P8"
+            //};
+            var text = {
+                "content": "Hello Wechat"
+            };
+            var msgData = yield wechatApi.previewMass('text', text, "obOZuwNrPrvO86PqO8xKc9TmRM0k");
+            console.log(msgData);
+
+            reply = "16!";
+        } else if (content === '17') {
+            var msgData = yield wechatApi.checkMass("6377907975521442655");
+            console.log(msgData);
+
+            reply = "17!";
         }
 
         this.body = reply;
