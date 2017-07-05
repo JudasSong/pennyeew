@@ -1,20 +1,20 @@
 'use strict'
 
 var path = require('path');
-var config = require('./config');
-var Wechat = require('./wechat/wechat');
+var config = require('../config');
+var Wechat = require('../wechat/wechat');
 var menu = require('./menu');
 var wechatApi = new Wechat(config.wechat);
 
-wechatApi.deleteMenu()
-    .then(function () {
+wechatApi.deleteMenu().then(function() {
+        // console.log(JSON.stringify(menu));
         return wechatApi.createMenu(menu)
     })
-    .then(function (msg) {
+    .then(function(msg) {
         console.log(msg);
     })
 
-exports.reply = function *(next) {
+exports.reply = function*(next) {
     var message = this.weixin;
 
     if (message.MsgType === 'event') {
@@ -36,6 +36,42 @@ exports.reply = function *(next) {
             this.body = '看到你扫二维码了' + "\n";
         } else if (message.Event === 'VIEW') {
             this.body = '您点击了菜单中的链接：' + message.EventKey + "\n";
+        } else if (message.Event === 'scancode_push') {
+            console.log(message.ScanCodeInfo.ScanType);
+            console.log(message.ScanCodeInfo.ScanResult);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
+        } else if (message.Event === 'scancode_waitmsg') {
+            console.log(message.ScanCodeInfo.ScanType);
+            console.log(message.ScanCodeInfo.ScanResult);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
+        } else if (message.Event === 'pic_sysphoto') {
+            console.log(message.SendPicsInfo.Count);
+            console.log(message.SendPicsInfo.PicList);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
+        } else if (message.Event === 'pic_photo_or_album') {
+
+            console.log(message.SendPicsInfo.Count);
+            console.log(message.SendPicsInfo.PicList);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
+        } else if (message.Event === 'pic_weixin') {
+
+            console.log(message.SendPicsInfo.Count);
+            console.log(message.SendPicsInfo.PicList);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
+        } else if (message.Event === 'location_select') {
+
+            console.log(message.SendLocationInfo.Location_X);
+            console.log(message.SendLocationInfo.Location_Y);
+            console.log(message.SendLocationInfo.Scale);
+            console.log(message.SendLocationInfo.Label);
+            console.log(message.SendLocationInfo.Poiname);
+
+            this.body = '您点击了菜单：' + message.EventKey + "\n";
         }
     } else if (message.MsgType === 'text') {
         var content = message.Content;
@@ -61,9 +97,9 @@ exports.reply = function *(next) {
             }];
 
             //console.log();
-        } else if (content === '5') { //5、6、7无接口权限--临时素材  __dirname + '/2.jpg'
-            var picUrl = path.join(__dirname, './2.jpg');
-            var data = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg');
+        } else if (content === '5') { //5、6、7无接口权限--临时素材  path.join(__dirname,'/2.jpg'
+            var picUrl = path.join(__dirname, '.../2.jpg');
+            var data = yield wechatApi.uploadMaterial('image', path.join(__dirname, '../2.jpg'));
 
             reply = {
                 "type": 'image',
@@ -72,7 +108,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '6') {
-            var data = yield wechatApi.uploadMaterial('video', __dirname + '/yangxue.mp4');
+            var data = yield wechatApi.uploadMaterial('video', path.join(__dirname, '../yangxue.mp4'));
 
             reply = {
                 "type": 'video',
@@ -83,7 +119,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '7') {
-            var data = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg');
+            var data = yield wechatApi.uploadMaterial('image', path.join(__dirname, '../2.jpg'));
 
             reply = {
                 "type": 'music',
@@ -96,7 +132,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '8') { //
-            var data = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg', {type: 'image'});
+            var data = yield wechatApi.uploadMaterial('image', path.join(__dirname, '../2.jpg'), { type: 'image' });
 
             reply = {
                 "type": 'image',
@@ -105,7 +141,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '9') { //
-            var data = yield wechatApi.uploadMaterial('video', __dirname + '/yangxue.mp4', {
+            var data = yield wechatApi.uploadMaterial('video', path.join(__dirname, '../yangxue.mp4'), {
                 type: 'video',
                 description: '{"title":"Really a nice place","introduction":"I have a dream"}'
             });
@@ -121,7 +157,7 @@ exports.reply = function *(next) {
 
             console.log(reply);
         } else if (content === '10') { //
-            var picData = yield wechatApi.uploadMaterial('image', __dirname + '/2.jpg', {});
+            var picData = yield wechatApi.uploadMaterial('image', path.join(__dirname, '../2.jpg'), {});
 
             var media = {
                 "articles": [{
@@ -151,7 +187,7 @@ exports.reply = function *(next) {
             var items = data.news_item;
             var news = [];
 
-            items.forEach(function (item) {
+            items.forEach(function(item) {
                 news.push({
                     "title": item.title,
                     "description": item.digest,
@@ -183,7 +219,8 @@ exports.reply = function *(next) {
                     type: 'news',
                     "offset": 0,
                     "count": 10
-                })];
+                })
+            ];
 
             console.log(JSON.stringify(results));
             reply = '11';
@@ -239,9 +276,8 @@ exports.reply = function *(next) {
 
             var openIds = [{
                 openid: message.FromUserName,
-                lang: "en"   //zh_CN
-            }
-            ];
+                lang: "en" //zh_CN
+            }];
 
             var users = yield wechatApi.fetchUsers(openIds);
             console.log(users);
@@ -259,7 +295,7 @@ exports.reply = function *(next) {
             var text = {
                 "content": "Hello Wechat"
             };
-            var msgData = yield wechatApi.sendByGroup('text', text, 0);  //'mpnews', mpnews, 0
+            var msgData = yield wechatApi.sendByGroup('text', text, 0); //'mpnews', mpnews, 0
             console.log(msgData);
 
             reply = "Yeah!";
@@ -278,7 +314,57 @@ exports.reply = function *(next) {
             var msgData = yield wechatApi.checkMass("6377907975521442655");
             console.log(msgData);
 
-            reply = "17!";
+            reply = "Yeah hah! 17!";
+        } else if (content === '18') {
+            var tempQr = {
+                "expire_seconds": 604800,
+                "action_name": "QR_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_id": 123
+                    }
+                }
+            };
+            var permQr = {
+                "action_name": "QR_LIMIT_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_id": 123
+                    }
+                }
+            };
+            var permStrQr = {
+                "action_name": "QR_LIMIT_STR_SCENE",
+                "action_info": {
+                    "scene": {
+                        "scene_str": "abc"
+                    }
+                }
+            };
+            var qr1 = yield wechatApi.createQrcode(tempQr);
+            var qr2 = yield wechatApi.createQrcode(permQr);
+            var qr3 = yield wechatApi.createQrcode(permStrQr);
+            //console.log(qr1);
+
+            reply = "Yeah hah!  18";
+        } else if (content === '19') {
+            var longUrl = "http://www.manami.com.cn";
+            var shortData = yield wechatApi.createshortUrl(null, longUrl);
+            //console.log(shortData);
+
+            reply = shortData.short_url;
+        } else if (content === '20') {
+            var semanticData = {
+                "query": "北京颐和园",
+                "city": "北京",
+                "category": "movie",
+                //"appid": "wxaaaaaaaaaaaaaaaa",
+                "uid": message.FromUserName
+            };
+            var _semanticData = yield wechatApi.semantic(semanticData);
+            console.log(_semanticData);
+
+            reply = JSON.stringify(_semanticData);
         }
 
         this.body = reply;
